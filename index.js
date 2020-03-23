@@ -8,6 +8,7 @@ oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
 async function run() {
 
+  console.log('Iniciando actualización')
   let connection, machines;
 
   try {
@@ -17,6 +18,7 @@ async function run() {
       connectString : "10.21.34.72:1521/BarcoDB"
     });
 
+    console.log('Leyendo base de datos')
     const result = await connection.execute(
       `select distinct c_machine_id, c_tool_id from pcms.t_jobs
       where c_seqnr = '0'`
@@ -25,6 +27,7 @@ async function run() {
     
     const machinesIds = ['I34', 'I36', 'I37', 'I41', 'I43', 'I44', 'I46', 'I49', 'I55', 'I57', 'I59', 'I60', 'I63', 'I65'];
 
+    console.log('Parseando rsultados');
     machines = result.rows
     .filter(machine => machinesIds.includes(machine.C_MACHINE_ID.trim()))
     .map(machine => {
@@ -57,7 +60,7 @@ async function run() {
     };
 
     machines.forEach(machine => {
-      // console.log(`Enviando PATCH a ${machine.id}`);
+      console.log(`Enviando PATCH a ${machine.id}`);
       axios.patch(`http://10.21.34.206:1026/v2/entities/${machine.id}/attrs`, {
         molde: {
           "value": parseInt(machine.molde),
@@ -75,4 +78,4 @@ async function run() {
 }
 
 run();
-// setInvertal(run, 60000);
+setInterval(run, 60000);
